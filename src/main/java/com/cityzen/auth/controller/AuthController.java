@@ -1,10 +1,13 @@
 package com.cityzen.auth.controller;
 import com.cityzen.auth.dto.*;
+import com.cityzen.auth.payload.ApiResponse;
 import com.cityzen.auth.service.AadhaarRegistryService;
 import com.cityzen.auth.service.AuthService;
 import com.cityzen.auth.service.EmailService;
 import com.cityzen.auth.service.OtpService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -12,7 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 public class AuthController {
     @Autowired
     private AuthService authService;
@@ -115,6 +118,23 @@ public class AuthController {
     public ResponseEntity<String> addAadhaar(@RequestBody AadhaarRequest request) {
         String response = service.saveAadhaar(request.getAadhaar());
         return ResponseEntity.ok(response);
+    }
+
+
+    @GetMapping("/get-count/citizen")
+    public ResponseEntity<ApiResponse<?>> getCitzenCount(HttpServletRequest request) {
+      try{
+
+          int count = authService.getUserCount();
+          if(count == 0){
+              return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(404, "NO DOCUMENT FOUND", null, request.getRequestURI()));
+          }
+
+          return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ApiResponse<>(200, "OK", count, request.getRequestURI()));
+
+      } catch (Exception e) {
+          return ResponseEntity.status(500).body(new ApiResponse<>(500, "INTERNAL_SERVER_ERROR:"+e.getMessage(), e.getMessage(),request.getRequestURI()));
+      }
     }
 }
 

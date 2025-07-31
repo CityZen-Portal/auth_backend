@@ -19,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -170,4 +171,17 @@ public class AuthServiceImpl implements AuthService {
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
     }
+
+    @Override
+    public int getUserCount() {
+        List<User> users = userRepository.findAll();
+        int countUser = 0;
+        for(User user : users) {
+            if(user.getRole() == Role.CITIZEN) {
+                countUser++;
+            }
+        }
+        return countUser;
+
+     }
 }

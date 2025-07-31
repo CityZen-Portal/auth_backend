@@ -13,6 +13,8 @@ public interface AuthService {
     void resetPassword(ResetPasswordRequest request);
     void changePassword(ChangePasswordRequest request);
 
+    int getUserCount();
+
     // Already added:
    // boolean validateOtp(String email, String otp);
 }
