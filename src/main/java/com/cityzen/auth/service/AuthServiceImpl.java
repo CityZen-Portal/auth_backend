@@ -1,6 +1,6 @@
 package com.cityzen.auth.service;
 
-import com.cityzen.auth.Payload.ApiResponse;
+import com.cityzen.auth.payload.ApiResponse;
 import com.cityzen.auth.dto.*;
 import com.cityzen.auth.entity.ForgotPasswordToken;
 import com.cityzen.auth.entity.User;
@@ -75,7 +75,7 @@ public class AuthServiceImpl implements AuthService {
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setAadhaar(request.getAadhaar());
-        user.setRoles(Collections.singleton(Role.CITIZEN)); // Default role
+        user.setRoles(Collections.singleton(Role.CITIZEN));
 
         userRepository.save(user);
 

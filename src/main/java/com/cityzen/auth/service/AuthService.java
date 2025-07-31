@@ -1,6 +1,6 @@
 package com.cityzen.auth.service;
 
-import com.cityzen.auth.Payload.ApiResponse;
+import com.cityzen.auth.payload.ApiResponse;
 import com.cityzen.auth.dto.*;
 
 import org.springframework.security.core.Authentication;
@@ -14,7 +14,4 @@ public interface AuthService {
     void changePassword(ChangePasswordRequest request);
     ApiResponse register(SignUpRequest request);
     int getCitizenCount();
-
-    int getUserCount();
-
 }
