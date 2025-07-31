@@ -36,11 +36,13 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/",
-                                "/auth/signup",
-                                "/auth/signin",
+                                "/auth/register",
+                                "/auth/login",
+                                "/auth/add-aadhaar",
                                 "/auth/verify-aadhaar",
                                 "/auth/forgot-password",
-                                "/auth/reset-password"
+                                "/auth/reset-password",
+                                "/auth/get-count/citizen"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

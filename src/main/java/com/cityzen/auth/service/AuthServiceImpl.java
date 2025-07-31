@@ -1,5 +1,6 @@
 package com.cityzen.auth.service;
 
+import com.cityzen.auth.Payload.ApiResponse;
 import com.cityzen.auth.dto.*;
 import com.cityzen.auth.entity.ForgotPasswordToken;
 import com.cityzen.auth.entity.User;
@@ -14,13 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @Primary
@@ -55,7 +54,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void signup(SignUpRequest request) {
+    public ApiResponse register(SignUpRequest request) {
         if (!isValidPassword(request.getPassword())) {
             throw new CustomException("Password must be at least 8 characters long and contain uppercase, lowercase, digit, and special character", HttpStatus.BAD_REQUEST);
         }
@@ -73,13 +72,15 @@ public class AuthServiceImpl implements AuthService {
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setAadhaar(request.getAadhaar());
-        user.setRole(Role.CITIZEN);
+        user.setRoles(Collections.singleton(Role.CITIZEN)); // Default role
 
         userRepository.save(user);
+
+        return new ApiResponse<>(200, "Registration successful", null, "/auth/register");
     }
 
     @Override
-    public JwtResponse signin(SignInRequest request) {
+    public JwtResponse login(SignInRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new CustomException("User not found with email: " + request.getEmail(), HttpStatus.NOT_FOUND));
 
@@ -87,11 +88,15 @@ public class AuthServiceImpl implements AuthService {
             throw new CustomException("Invalid password", HttpStatus.UNAUTHORIZED);
         }
 
-        String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
+        List<String> roles = user.getRoles().stream()
+                .map(Enum::name)
+                .toList();
+
+        String token = jwtUtil.generateToken(user.getEmail(), roles.get(0)); // Use first role for token, or adjust as needed
 
         return new JwtResponse(
                 token,
-                user.getRole().name(),
+                roles,
                 user.getEmail(),
                 System.currentTimeMillis() + 3600000
         );
@@ -104,11 +109,15 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException("User not found with email: " + email, HttpStatus.NOT_FOUND));
 
-        String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
+        List<String> roles = user.getRoles().stream()
+                .map(Enum::name)
+                .toList();
+
+        String token = jwtUtil.generateToken(user.getEmail(), roles.isEmpty() ? "" : roles.get(0));
 
         return new JwtResponse(
                 token,
-                user.getRole().name(),
+                roles,
                 user.getEmail(),
                 System.currentTimeMillis() + 3600000
         );
@@ -169,5 +178,10 @@ public class AuthServiceImpl implements AuthService {
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
+    }
+
+    @Override
+    public int getCitizenCount() {
+        return (int) userRepository.countByRolesContaining(com.cityzen.auth.enums.Role.CITIZEN);
     }
 }
