@@ -2,12 +2,14 @@ package com.cityzen.auth.controller;
 
 import com.cityzen.auth.Payload.ApiResponse;
 import com.cityzen.auth.dto.*;
+import com.cityzen.auth.payload.ApiResponse;
 import com.cityzen.auth.service.AadhaarRegistryService;
 import com.cityzen.auth.service.AuthService;
 import com.cityzen.auth.service.EmailService;
 import com.cityzen.auth.service.OtpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 public class AuthController {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
@@ -174,8 +176,7 @@ public class AuthController {
         String response = service.saveAadhaar(aadhaar);
         return ResponseEntity.ok(new ApiResponse<>(200, response, null, httpRequest.getRequestURI()));
     }
-
-
+    
     @GetMapping("/get-count/citizen")
     public ResponseEntity<ApiResponse<Integer>> getCitizenCount(HttpServletRequest httpRequest) {
         int count = authService.getCitizenCount();

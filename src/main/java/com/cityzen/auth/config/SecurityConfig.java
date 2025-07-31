@@ -35,6 +35,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
+
                                 "/",
                                 "/auth/register",
                                 "/auth/login",
@@ -43,6 +44,8 @@ public class SecurityConfig {
                                 "/auth/forgot-password",
                                 "/auth/reset-password",
                                 "/auth/get-count/citizen"
+
+                             
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

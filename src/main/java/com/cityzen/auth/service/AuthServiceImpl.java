@@ -20,6 +20,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @Primary
@@ -179,8 +182,7 @@ public class AuthServiceImpl implements AuthService {
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
     }
-
-    @Override
+@Override
     public int getCitizenCount() {
         return (int) userRepository.countByRolesContaining(com.cityzen.auth.enums.Role.CITIZEN);
     }

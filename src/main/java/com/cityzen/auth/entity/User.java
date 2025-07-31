@@ -9,6 +9,12 @@ import java.util.Set;
 
 @Entity
 @Data
+import lombok.*;
+
+@Entity
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,5 +27,8 @@ public class User {
 
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
-    private Set<Role> roles = new HashSet<>();
+
+
+    private Role role;
+    private String aadhaar;  
 }

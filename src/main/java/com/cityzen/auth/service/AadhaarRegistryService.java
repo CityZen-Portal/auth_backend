@@ -11,6 +11,7 @@ public class AadhaarRegistryService {
     @Autowired
     private AadhaarRegistryRepository repository;
 
+
     public String saveAadhaar(String aadhaarNumber) {
         if (repository.existsByAadhaarNumber(aadhaarNumber)) {
             return "Aadhaar already exists.";
@@ -22,4 +23,5 @@ public class AadhaarRegistryService {
 
         return "Aadhaar saved successfully.";
     }
+
 }
