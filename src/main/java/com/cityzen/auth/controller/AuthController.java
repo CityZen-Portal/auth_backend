@@ -1,8 +1,7 @@
 package com.cityzen.auth.controller;
 
-import com.cityzen.auth.Payload.ApiResponse;
-import com.cityzen.auth.dto.*;
 import com.cityzen.auth.payload.ApiResponse;
+import com.cityzen.auth.dto.*;
 import com.cityzen.auth.service.AadhaarRegistryService;
 import com.cityzen.auth.service.AuthService;
 import com.cityzen.auth.service.EmailService;
@@ -20,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/auth")
 public class AuthController {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);

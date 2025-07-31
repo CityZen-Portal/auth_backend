@@ -2,20 +2,18 @@ package com.cityzen.auth.entity;
 
 import com.cityzen.auth.enums.Role;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.util.HashSet;
 import java.util.Set;
-
-@Entity
-@Data
-import lombok.*;
 
 @Entity
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class User {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -25,10 +23,7 @@ public class User {
     private String password;
     private String aadhaar;
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
-
-
-    private Role role;
-    private String aadhaar;  
+    private Set<Role> roles;
 }
