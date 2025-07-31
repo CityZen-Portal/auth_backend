@@ -1,6 +1,6 @@
 package com.cityzen.auth.enums;
 public enum Role {
-    CITIZEN,
+    ADMIN,
     STAFF,
-    ADMIN
+    CITIZEN
 }

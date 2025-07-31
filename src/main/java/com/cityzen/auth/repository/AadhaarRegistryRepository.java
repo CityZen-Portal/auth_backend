@@ -9,5 +9,5 @@ public interface AadhaarRegistryRepository extends JpaRepository<AadhaarRegistry
 
     Optional<AadhaarRegistry> findByAadhaarNumber(String aadhaarNumber);
 
-    boolean existsByAadhaarNumber(String aadhaarNumber); // ✅ Add this for duplicate check
+    boolean existsByAadhaarNumber(String aadhaarNumber);
 }

@@ -39,7 +39,7 @@ public class OtpService {
     private final ConcurrentHashMap<String, OtpEntry> otpMap = new ConcurrentHashMap<>();
 
     public String generateOtp(String email) {
-        // ✅ Check if user exists
+
         if (!userRepository.findByEmail(email).isPresent()) {
             throw new CustomException("Email not registered: " + email, HttpStatus.NOT_FOUND);
         }
@@ -53,7 +53,7 @@ public class OtpService {
     }
 
     public String resendOtp(String email) {
-        // ✅ Check if user exists
+
         if (!userRepository.findByEmail(email).isPresent()) {
             throw new CustomException("Email not registered: " + email, HttpStatus.NOT_FOUND);
         }

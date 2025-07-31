@@ -21,7 +21,7 @@ public class EmailService {
 
         emailSender.send(message);
     }
-    // Optional: You can keep this method if you plan to use it in the future
+
     public void sendOtp(String email, String otp) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(email);

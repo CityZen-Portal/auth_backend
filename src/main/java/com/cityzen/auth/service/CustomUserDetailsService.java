@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.*;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
+import java.util.stream.Collectors;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
@@ -23,7 +24,9 @@ public class CustomUserDetailsService implements UserDetailsService {
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
                 user.getPassword(),
-                Collections.singleton(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
+                user.getRoles().stream()
+                        .map(role -> new SimpleGrantedAuthority("ROLE_" + role.name()))
+                        .collect(Collectors.toSet())
         );
     }
 }

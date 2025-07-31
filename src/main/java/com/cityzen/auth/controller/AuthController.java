@@ -1,22 +1,30 @@
 package com.cityzen.auth.controller;
+
+import com.cityzen.auth.Payload.ApiResponse;
 import com.cityzen.auth.dto.*;
 import com.cityzen.auth.payload.ApiResponse;
 import com.cityzen.auth.service.AadhaarRegistryService;
 import com.cityzen.auth.service.AuthService;
 import com.cityzen.auth.service.EmailService;
 import com.cityzen.auth.service.OtpService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
+import jakarta.servlet.http.HttpServletRequest;
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+
     @Autowired
     private AuthService authService;
     @Autowired
@@ -29,115 +37,155 @@ public class AuthController {
     private EmailService emailService;
 
     @PostMapping("/verify-aadhaar")
-    public ResponseEntity<?> verifyAadhaar(@RequestBody AadhaarVerifyRequest request) {
-        // Verify the Aadhaar number
+    public ResponseEntity<ApiResponse<Boolean>> verifyAadhaar(@RequestBody AadhaarVerifyRequest request, HttpServletRequest httpRequest) {
         boolean isVerified = authService.verifyAadhaar(request.getAadhaar());
         if (isVerified) {
-            return ResponseEntity.ok("Aadhaar number is verified.");
+            return ResponseEntity.ok(new ApiResponse<>(200, "Aadhaar number is verified.", true, httpRequest.getRequestURI()));
         } else {
-            return ResponseEntity.badRequest().body("Aadhaar number not found.");
+            return ResponseEntity.status(404).body(new ApiResponse<>(404, "Aadhaar number not found.", false, httpRequest.getRequestURI()));
         }
     }
 
-//    @PostMapping("/validate-otp")
-//    public ResponseEntity<?> validateOtp(@RequestBody ValidateOtpRequest request) {
-//        // Validate the OTP against the generated OTP
-//        return null;
-//    }
+    @PostMapping("/register")
+    public ResponseEntity<ApiResponse<?>> register(@RequestBody SignUpRequest request, HttpServletRequest httpRequest) {
+        try {
 
-    @PostMapping("/signup")
-    public ResponseEntity<?> signup(@RequestBody SignUpRequest request) {
-        // Proceed with signup after OTP verification
-        authService.signup(request);
-//        System.out.println("🚨 SIGNUP called");
-//        System.out.println("Request Body: " + request);
-        return ResponseEntity.ok("User registered successfully");
+            String aadhaar = request.getAadhaar();
+            if (aadhaar == null || !aadhaar.matches("\\d{12}")) {
+                return ResponseEntity.status(400)
+                        .body(new ApiResponse<>(400, "Aadhaar number must be exactly 12 digits", null, httpRequest.getRequestURI()));
+            }
+
+            if (!authService.verifyAadhaar(aadhaar)) {
+                return ResponseEntity.status(400)
+                        .body(new ApiResponse<>(400, "Aadhaar number not verified or not found", null, httpRequest.getRequestURI()));
+            }
+            ApiResponse<?> response = authService.register(request);
+            response.setApi(httpRequest.getRequestURI());
+            return ResponseEntity.status(response.getStatus()).body(response);
+        } catch (Exception e) {
+            logger.error("Signup failed: {}", e.getMessage());
+            return ResponseEntity.status(500)
+                    .body(new ApiResponse<>(500, "Registration failed: " + e.getMessage(), null, httpRequest.getRequestURI()));
+        }
     }
 
-//    @PostMapping("/signin")
-//    public ResponseEntity<JwtResponse> signin(@RequestBody SignInRequest request) {
-//        // Authenticate user and return JWT token
-//        JwtResponse jwtResponse = authService.signin(request);
-//        return ResponseEntity.ok(jwtResponse);
-//    }
-
-    @PostMapping("/signin")
-    public ResponseEntity<JwtResponse> signin(@RequestBody SignInRequest request) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/admin-only")
+    public ResponseEntity<ApiResponse<String>> adminEndpoint(@RequestParam String data, HttpServletRequest httpRequest) {
+        ApiResponse<String> response = new ApiResponse<>(
+                HttpStatus.OK.value(),
+                "Admin access granted",
+                data,
+                httpRequest.getRequestURI()
         );
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        JwtResponse jwtResponse = authService.generateJwtResponse(authentication);
-        return ResponseEntity.ok(jwtResponse);
-    }
-
-    @PostMapping("/forgot-password")
-    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest request) {
-        // Generate and save reset token, send email to user
-        authService.forgotPassword(request);
-        return ResponseEntity.ok("Password reset email sent");
-    }
-
-    @PostMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
-        // Reset password using the provided token
-        authService.resetPassword(request);
-        return ResponseEntity.ok("Password reset successfully");
-    }
-
-    @PutMapping("/change-password")
-    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest request) {
-        // Allow logged-in users to update their password
-        authService.changePassword(request);
-        return ResponseEntity.ok("Password changed successfully");
-    }
-    @PostMapping("/generate-otp")
-    public ResponseEntity<?> generateOtp(@RequestBody EmailRequest request) {
-        String otp = otpService.generateOtp(request.getEmail());
-        emailService.sendOtp(request.getEmail(), otp);
-        return ResponseEntity.ok("OTP sent to " + request.getEmail());
-    }
-
-    @PostMapping("/resend-otp")
-    public ResponseEntity<?> resendOtp(@RequestBody EmailRequest request) {
-        String otp = otpService.resendOtp(request.getEmail());
-        emailService.sendOtp(request.getEmail(), otp);
-        return ResponseEntity.ok("OTP resent to " + request.getEmail());
-    }
-
-    @PostMapping("/validate-otp")
-    public ResponseEntity<?> validateOtp(@RequestBody ValidateOtpRequest request) {
-        boolean isValid = otpService.validateOtp(request.getEmail(), request.getOtp());
-        if (isValid) {
-            return ResponseEntity.ok("OTP is valid");
-        } else {
-            return ResponseEntity.badRequest().body("Invalid OTP");
-        }
-    }
-    @PostMapping("/add-aadhaar")
-    public ResponseEntity<String> addAadhaar(@RequestBody AadhaarRequest request) {
-        String response = service.saveAadhaar(request.getAadhaar());
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponse<JwtResponse>> login(@RequestBody SignInRequest request, HttpServletRequest httpRequest) {
+        try {
+            JwtResponse jwtResponse = authService.login(request);
+            ApiResponse<JwtResponse> response = new ApiResponse<>(
+                    HttpStatus.OK.value(),
+                    "Login successful",
+                    jwtResponse,
+                    httpRequest.getRequestURI()
+            );
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Signin failed: {}", e.getMessage());
+            return ResponseEntity.status(401).body(new ApiResponse<>(401, "Login failed: " + e.getMessage(), null, httpRequest.getRequestURI()));
+        }
+    }
 
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ApiResponse<String>> forgotPassword(@RequestBody ForgotPasswordRequest request, HttpServletRequest httpRequest) {
+        try {
+            authService.forgotPassword(request);
+            return ResponseEntity.ok(new ApiResponse<>(200, "Password reset email sent", null, httpRequest.getRequestURI()));
+        } catch (Exception e) {
+            logger.error("Forgot password failed: {}", e.getMessage());
+            return ResponseEntity.status(500).body(new ApiResponse<>(500, "Failed to send password reset email: " + e.getMessage(), null, httpRequest.getRequestURI()));
+        }
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse<String>> resetPassword(@RequestBody ResetPasswordRequest request, HttpServletRequest httpRequest) {
+        try {
+            authService.resetPassword(request);
+            return ResponseEntity.ok(new ApiResponse<>(200, "Password reset successfully", null, httpRequest.getRequestURI()));
+        } catch (Exception e) {
+            logger.error("Reset password failed: {}", e.getMessage());
+            return ResponseEntity.status(400).body(new ApiResponse<>(400, "Password reset failed: " + e.getMessage(), null, httpRequest.getRequestURI()));
+        }
+    }
+
+    @PutMapping("/change-password")
+    public ResponseEntity<ApiResponse<String>> changePassword(@RequestBody ChangePasswordRequest request, HttpServletRequest httpRequest) {
+        try {
+            authService.changePassword(request);
+            return ResponseEntity.ok(new ApiResponse<>(200, "Password changed successfully", null, httpRequest.getRequestURI()));
+        } catch (Exception e) {
+            logger.error("Change password failed: {}", e.getMessage());
+            return ResponseEntity.status(400).body(new ApiResponse<>(400, "Password change failed: " + e.getMessage(), null, httpRequest.getRequestURI()));
+        }
+    }
+
+    @PostMapping("/generate-otp")
+    public ResponseEntity<ApiResponse<String>> generateOtp(@RequestBody EmailRequest request, HttpServletRequest httpRequest) {
+        try {
+            String otp = otpService.generateOtp(request.getEmail());
+            emailService.sendOtp(request.getEmail(), otp);
+            return ResponseEntity.ok(new ApiResponse<>(200, "OTP sent to " + request.getEmail(), null, httpRequest.getRequestURI()));
+        } catch (Exception e) {
+            logger.error("Generate OTP failed: {}", e.getMessage());
+            return ResponseEntity.status(500).body(new ApiResponse<>(500, "Failed to generate OTP: " + e.getMessage(), null, httpRequest.getRequestURI()));
+        }
+    }
+
+    @PostMapping("/resend-otp")
+    public ResponseEntity<ApiResponse<String>> resendOtp(@RequestBody EmailRequest request, HttpServletRequest httpRequest) {
+        try {
+            String otp = otpService.resendOtp(request.getEmail());
+            emailService.sendOtp(request.getEmail(), otp);
+            return ResponseEntity.ok(new ApiResponse<>(200, "OTP resent to " + request.getEmail(), null, httpRequest.getRequestURI()));
+        } catch (Exception e) {
+            logger.error("Resend OTP failed: {}", e.getMessage());
+            return ResponseEntity.status(500).body(new ApiResponse<>(500, "Failed to resend OTP: " + e.getMessage(), null, httpRequest.getRequestURI()));
+        }
+    }
+
+    @PostMapping("/validate-otp")
+    public ResponseEntity<ApiResponse<Boolean>> validateOtp(@RequestBody ValidateOtpRequest request, HttpServletRequest httpRequest) {
+        boolean isValid = otpService.validateOtp(request.getEmail(), request.getOtp());
+        if (isValid) {
+            return ResponseEntity.ok(new ApiResponse<>(200, "OTP is valid", true, httpRequest.getRequestURI()));
+        } else {
+            return ResponseEntity.status(400).body(new ApiResponse<>(400, "Invalid OTP", false, httpRequest.getRequestURI()));
+        }
+    }
+
+    @PostMapping("/add-aadhaar")
+    public ResponseEntity<ApiResponse<String>> addAadhaar(@RequestBody AadhaarRequest request, HttpServletRequest httpRequest) {
+        String aadhaar = request.getAadhaar();
+        if (aadhaar == null || !aadhaar.matches("\\d{12}")) {
+            return ResponseEntity.status(400)
+                    .body(new ApiResponse<>(400, "Aadhaar number must be exactly 12 digits", null, httpRequest.getRequestURI()));
+        }
+        String response = service.saveAadhaar(aadhaar);
+        return ResponseEntity.ok(new ApiResponse<>(200, response, null, httpRequest.getRequestURI()));
+    }
+    
     @GetMapping("/get-count/citizen")
-    public ResponseEntity<ApiResponse<?>> getCitzenCount(HttpServletRequest request) {
-      try{
-
-          int count = authService.getUserCount();
-          if(count == 0){
-              return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(404, "NO DOCUMENT FOUND", null, request.getRequestURI()));
-          }
-
-          return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ApiResponse<>(200, "OK", count, request.getRequestURI()));
-
-      } catch (Exception e) {
-          return ResponseEntity.status(500).body(new ApiResponse<>(500, "INTERNAL_SERVER_ERROR:"+e.getMessage(), e.getMessage(),request.getRequestURI()));
-      }
+    public ResponseEntity<ApiResponse<Integer>> getCitizenCount(HttpServletRequest httpRequest) {
+        int count = authService.getCitizenCount();
+        ApiResponse<Integer> response = new ApiResponse<>(
+                200,
+                "OK",
+                count,
+                httpRequest.getRequestURI()
+        );
+        return ResponseEntity.ok(response);
     }
 }
-
-
-
-
