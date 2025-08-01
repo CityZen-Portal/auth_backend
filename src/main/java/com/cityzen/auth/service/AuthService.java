@@ -14,4 +14,5 @@ public interface AuthService {
     void changePassword(ChangePasswordRequest request);
     ApiResponse register(SignUpRequest request);
     int getCitizenCount();
+    JwtResponse refreshToken(RefreshTokenRequest request);
 }

@@ -16,6 +16,7 @@ public class JwtUtil {
         claims.put("role", role);
         return createToken(claims, username);
     }
+
     private String createToken(Map<String, Object> claims, String subject) {
         return Jwts.builder()
                 .setClaims(claims)
@@ -25,16 +26,19 @@ public class JwtUtil {
                 .signWith(SignatureAlgorithm.HS256, secret)
                 .compact();
     }
+
     public boolean validateToken(String token, String username) {
         final String extractedUsername = extractUsername(token);
         return (extractedUsername.equals(username) && !isTokenExpired(token));
     }
+
     public String extractUsername(String token) {
         return extractAllClaims(token).getSubject();
     }
     public Claims extractAllClaims(String token) {
         return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
     }
+
     private boolean isTokenExpired(String token) {
         return extractAllClaims(token).getExpiration().before(new Date());
     }
@@ -45,5 +49,20 @@ public class JwtUtil {
                 .map(grantedAuthority -> grantedAuthority.getAuthority())
                 .orElse("");
         return generateToken(username, role);
+    }
+
+    public String generateRefreshToken (String username){
+        Map<String, Object> claims = new HashMap<>();
+        return Jwts.builder()
+                .setClaims(claims)
+                .setSubject(username)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + 7 * 24 * 3600000)) // 7 days
+                .signWith(SignatureAlgorithm.HS256, secret)
+                .compact();
+    }
+
+    public long getRefreshTokenExpirationMillis () {
+        return 7 * 24 * 3600000; // 7 days
     }
 }

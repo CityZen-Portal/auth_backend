@@ -6,4 +6,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
     Optional<User> findByAadhaar(String aadhaar);
     long countByRolesContaining(com.cityzen.auth.enums.Role role);
+    Optional<User> findByRefreshToken(String refreshToken);
 }
