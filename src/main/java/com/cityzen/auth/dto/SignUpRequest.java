@@ -17,6 +17,7 @@ SignUpRequest {
     @NotBlank
     private String aadhaar;
     private Role role;;
+    private String gender;
 
     public boolean isValidPassword() {
         return password != null && password.length() >= 8 &&
