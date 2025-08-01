@@ -46,6 +46,7 @@ public class SecurityConfig {
                                 "/auth/get-count/citizen",
                                 "/auth/refresh-token",
                                 "/auth/get-count/gender"
+
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
