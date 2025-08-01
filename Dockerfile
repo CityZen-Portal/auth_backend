@@ -12,3 +12,10 @@ EXPOSE 8080
 
 # Run the JAR file
 ENTRYPOINT ["java", "-jar", "app.jar"]
+
+## Set environment variables
+#ENV SPRING_OUTPUT_ANSI_ENABLED=ALWAYS \
+#    JAVA_OPTS=""
+
+## Add a volume pointing to /tmp
+#VOLUME /tmp

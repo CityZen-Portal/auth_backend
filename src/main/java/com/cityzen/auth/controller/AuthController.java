@@ -16,7 +16,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/auth")
@@ -186,5 +185,17 @@ public class AuthController {
                 httpRequest.getRequestURI()
         );
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<ApiResponse<JwtResponse>> refreshToken(@RequestBody RefreshTokenRequest request, HttpServletRequest httpRequest) {
+        try {
+            JwtResponse responseData = authService.refreshToken(request);
+            ApiResponse<JwtResponse> response = new ApiResponse<>(200, "Token refreshed", responseData, httpRequest.getRequestURI());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Refresh token failed: {}", e.getMessage());
+            return ResponseEntity.status(401).body(new ApiResponse<>(401, "Refresh token failed: " + e.getMessage(), null, httpRequest.getRequestURI()));
+        }
     }
 }

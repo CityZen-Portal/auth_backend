@@ -18,6 +18,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.List;
@@ -95,10 +96,15 @@ public class AuthServiceImpl implements AuthService {
                 .map(Enum::name)
                 .toList();
 
-        String token = jwtUtil.generateToken(user.getEmail(), roles.get(0)); // Use first role for token, or adjust as needed
+        String accessToken = jwtUtil.generateToken(user.getEmail(), roles.get(0));
+        String refreshToken = jwtUtil.generateRefreshToken(user.getEmail());
+        user.setRefreshToken(refreshToken);
+        user.setRefreshTokenExpiry(Instant.now().plusMillis(jwtUtil.getRefreshTokenExpirationMillis()));
+        userRepository.save(user);
 
         return new JwtResponse(
-                token,
+                accessToken,
+                refreshToken,
                 roles,
                 user.getEmail(),
                 System.currentTimeMillis() + 3600000
@@ -116,10 +122,15 @@ public class AuthServiceImpl implements AuthService {
                 .map(Enum::name)
                 .toList();
 
-        String token = jwtUtil.generateToken(user.getEmail(), roles.isEmpty() ? "" : roles.get(0));
+        String accessToken = jwtUtil.generateToken(user.getEmail(), roles.isEmpty() ? "" : roles.get(0));
+        String refreshToken = jwtUtil.generateRefreshToken(user.getEmail());
+        user.setRefreshToken(refreshToken);
+        user.setRefreshTokenExpiry(Instant.now().plusMillis(jwtUtil.getRefreshTokenExpirationMillis()));
+        userRepository.save(user);
 
         return new JwtResponse(
-                token,
+                accessToken,
+                refreshToken,
                 roles,
                 user.getEmail(),
                 System.currentTimeMillis() + 3600000
@@ -185,5 +196,33 @@ public class AuthServiceImpl implements AuthService {
 @Override
     public int getCitizenCount() {
         return (int) userRepository.countByRolesContaining(com.cityzen.auth.enums.Role.CITIZEN);
+    }
+
+    @Override
+    public JwtResponse refreshToken(RefreshTokenRequest request) {
+        User user = userRepository.findByRefreshToken(request.getRefreshToken())
+                .orElseThrow(() -> new CustomException("Invalid refresh token", HttpStatus.UNAUTHORIZED));
+
+        if (user.getRefreshTokenExpiry().isBefore(Instant.now())) {
+            throw new CustomException("Refresh token expired", HttpStatus.UNAUTHORIZED);
+        }
+
+        List<String> roles = user.getRoles().stream()
+                .map(Enum::name)
+                .toList();
+
+        String accessToken = jwtUtil.generateToken(user.getEmail(), roles.isEmpty() ? "" : roles.get(0));
+        String refreshToken = jwtUtil.generateRefreshToken(user.getEmail());
+        user.setRefreshToken(refreshToken);
+        user.setRefreshTokenExpiry(Instant.now().plusMillis(jwtUtil.getRefreshTokenExpirationMillis()));
+        userRepository.save(user);
+
+        return new JwtResponse(
+                accessToken,
+                refreshToken,
+                roles,
+                user.getEmail(),
+                System.currentTimeMillis() + 3600000
+        );
     }
 }

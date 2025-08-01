@@ -43,9 +43,8 @@ public class SecurityConfig {
                                 "/auth/verify-aadhaar",
                                 "/auth/forgot-password",
                                 "/auth/reset-password",
-                                "/auth/get-count/citizen"
-
-                             
+                                "/auth/get-count/citizen",
+                                "/auth/refresh-token"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
