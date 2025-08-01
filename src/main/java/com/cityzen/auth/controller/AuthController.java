@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 public class AuthController {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
@@ -186,5 +186,25 @@ public class AuthController {
                 httpRequest.getRequestURI()
         );
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/get-count/gender")
+    public ResponseEntity<ApiResponse<?>> getGenderCount(HttpServletRequest httpRequest) {
+        try{
+
+            int maleCount = authService.getGendercount("male");
+            int femaleCount = authService.getGendercount("female");
+            int otherCount = authService.getGendercount("other");
+            GenderCountDto count  = new GenderCountDto();
+            count.setMaleCount(maleCount);
+            count.setFemaleCount(femaleCount);
+            count.setOthersCount(otherCount);
+            ApiResponse<GenderCountDto> response = new ApiResponse<>(200,  "OK", count, httpRequest.getRequestURI());
+            return ResponseEntity.ok(response);
+        }
+        catch (Exception e){
+            return ResponseEntity.status(400).body(new ApiResponse<>(500, "Internal Server Error", e.getMessage(), httpRequest.getRequestURI()));
+        }
+
     }
 }

@@ -182,8 +182,14 @@ public class AuthServiceImpl implements AuthService {
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
     }
-@Override
+
+    @Override
     public int getCitizenCount() {
         return (int) userRepository.countByRolesContaining(com.cityzen.auth.enums.Role.CITIZEN);
+    }
+
+    @Override
+    public int getGendercount(String gender) {
+        return userRepository.countByGenderContaining(gender);
     }
 }

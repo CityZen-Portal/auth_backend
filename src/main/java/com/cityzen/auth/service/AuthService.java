@@ -14,4 +14,6 @@ public interface AuthService {
     void changePassword(ChangePasswordRequest request);
     ApiResponse register(SignUpRequest request);
     int getCitizenCount();
+
+    int getGendercount(String male);
 }

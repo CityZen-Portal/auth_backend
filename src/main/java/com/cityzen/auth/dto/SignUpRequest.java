@@ -2,11 +2,14 @@ package com.cityzen.auth.dto;
 import com.cityzen.auth.enums.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-public class
-SignUpRequest {
+@AllArgsConstructor
+@NoArgsConstructor
+public class SignUpRequest {
     @NotBlank
     private String userName;
     @Email
@@ -16,7 +19,9 @@ SignUpRequest {
     private String password;
     @NotBlank
     private String aadhaar;
-    private Role role;;
+    private Role role;
+
+    private String gender;
 
     public boolean isValidPassword() {
         return password != null && password.length() >= 8 &&
