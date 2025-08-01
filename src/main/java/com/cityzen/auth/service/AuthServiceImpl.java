@@ -77,6 +77,7 @@ public class AuthServiceImpl implements AuthService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setAadhaar(request.getAadhaar());
         user.setRoles(Collections.singleton(Role.CITIZEN));
+        user.setGender(request.getGender());
 
         userRepository.save(user);
 
@@ -193,7 +194,8 @@ public class AuthServiceImpl implements AuthService {
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
     }
-@Override
+
+    @Override
     public int getCitizenCount() {
         return (int) userRepository.countByRolesContaining(com.cityzen.auth.enums.Role.CITIZEN);
     }
@@ -224,5 +226,10 @@ public class AuthServiceImpl implements AuthService {
                 user.getEmail(),
                 System.currentTimeMillis() + 3600000
         );
+    }
+
+    @Override
+    public int getgenderCount(String gender) {
+        return (int) userRepository.countByGenderIgnoreCase(gender);
     }
 }

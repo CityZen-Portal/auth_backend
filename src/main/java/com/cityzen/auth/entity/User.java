@@ -30,4 +30,6 @@ public class User {
 
     private String refreshToken;
     private Instant refreshTokenExpiry;
+
+    private String gender;
 }

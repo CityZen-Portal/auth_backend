@@ -198,4 +198,22 @@ public class AuthController {
             return ResponseEntity.status(401).body(new ApiResponse<>(401, "Refresh token failed: " + e.getMessage(), null, httpRequest.getRequestURI()));
         }
     }
+
+    @GetMapping("/get-count/gender")
+    public ResponseEntity<ApiResponse<?>> getGenderCount(HttpServletRequest httpRequest) {
+        try {
+
+            int maleCount = authService.getgenderCount("male");
+            int femaleCount = authService.getgenderCount("female");
+            int otherCount = authService.getgenderCount("other");
+            GenderCountDto count = new GenderCountDto();
+            count.setMaleCount(maleCount);
+            count.setFemaleCount(femaleCount);
+            count.setOtherCount(otherCount);
+            ApiResponse<GenderCountDto> response = new ApiResponse<>(200, "OK", count, httpRequest.getRequestURI());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body(new ApiResponse<>(500, "Internal Server Error", e.getMessage(), httpRequest.getRequestURI()));
+        }
+    }
 }

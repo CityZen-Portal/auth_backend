@@ -44,7 +44,8 @@ public class SecurityConfig {
                                 "/auth/forgot-password",
                                 "/auth/reset-password",
                                 "/auth/get-count/citizen",
-                                "/auth/refresh-token"
+                                "/auth/refresh-token",
+                                "/auth/get-count/gender"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

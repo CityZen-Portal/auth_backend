@@ -15,4 +15,5 @@ public interface AuthService {
     ApiResponse register(SignUpRequest request);
     int getCitizenCount();
     JwtResponse refreshToken(RefreshTokenRequest request);
+    int getgenderCount(String gender);
 }
