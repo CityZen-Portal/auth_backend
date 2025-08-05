@@ -14,7 +14,8 @@ public class WebConfig {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
                         .allowedOrigins(
-                                "https://cityzen-frontend.vercel.app"
+                                "https://cityzen-frontend.vercel.app",
+                                "http://localhost:3000"
                         )
                         .allowedMethods("*")
                         .allowedHeaders("*")
