@@ -5,6 +5,8 @@ import com.cityzen.auth.dto.*;
 
 import org.springframework.security.core.Authentication;
 
+import java.util.Optional;
+
 public interface AuthService {
     boolean verifyAadhaar(String aadhaar);
     JwtResponse login(SignInRequest request);
@@ -16,4 +18,6 @@ public interface AuthService {
     int getCitizenCount();
     JwtResponse refreshToken(RefreshTokenRequest request);
     int getgenderCount(String gender );
+
+    Long doesUserExist(String email);
 }
