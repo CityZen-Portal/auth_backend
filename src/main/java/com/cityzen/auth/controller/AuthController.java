@@ -18,6 +18,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 
 @RestController
 @RequestMapping("/api/auth")
@@ -225,15 +227,15 @@ public class AuthController {
     public ResponseEntity<ApiResponse<?>> getUser(@PathVariable String email, HttpServletRequest httpRequest) {
         try{
 
-            long aadharNumber = authService.doesUserExist(email);
+            if(email == "" || email == null){
+                return ResponseEntity.status(400).body(new ApiResponse<>(400, "Invalid email", null, httpRequest.getRequestURI()));
+            }
+           Long aadharNumber = authService.doesUserExist(email);
 
-            if(aadharNumber == 0){
+            if(aadharNumber == null){
                 return ResponseEntity.status(404).body(new ApiResponse<>(404, "User not found", null, httpRequest.getRequestURI()));
             }
-
             return ResponseEntity.ok(new ApiResponse<>(200, "OK", aadharNumber, httpRequest.getRequestURI()));
-
-
 
         } catch (Exception e) {
             return ResponseEntity.status(500).body(new ApiResponse<>(500, "Internal Server Error", e.getMessage(), httpRequest.getRequestURI()));

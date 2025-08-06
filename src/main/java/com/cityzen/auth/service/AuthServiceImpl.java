@@ -233,12 +233,15 @@ public class AuthServiceImpl implements AuthService {
         return (int) userRepository.countByGenderIgnoreCase(gender);
     }
 
-    @Override
-    public long doesUserExist(String email) {
-        Optional<User> user =  userRepository.findUserByAadhaar(email);
-        if(user == null){
-            return 0;
+    public Long doesUserExist(String email) {
+        Optional<User> user = userRepository.findByEmail(email);
+        if(!user.isPresent()) {
+            return null;
         }
-        return Long.parseLong(user.get().getAadhaar());
+        long res = Long.parseLong(user.get().getAadhaar());
+
+        return res;
     }
+
+
 }
