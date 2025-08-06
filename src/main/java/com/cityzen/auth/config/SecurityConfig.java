@@ -31,22 +31,11 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                    JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
-        http
+        http.cors(cors -> {})
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-
-                                "/",
-                                "/auth/register",
-                                "/auth/login",
-                                "/auth/add-aadhaar",
-                                "/auth/verify-aadhaar",
-                                "/auth/forgot-password",
-                                "/auth/reset-password",
-                                "/auth/get-count/citizen",
-                                "/auth/refresh-token",
-                                "/auth/get-count/gender"
-
+                                "/api/auth/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

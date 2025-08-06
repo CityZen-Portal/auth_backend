@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 public class AuthController {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
@@ -51,7 +51,7 @@ public class AuthController {
             String aadhaar = request.getAadhaar();
             if (aadhaar == null || !aadhaar.matches("\\d{12}")) {
                 return ResponseEntity.status(400)
-                        .body(new ApiResponse<>(400, "Aadhaar number must be exactly 12 digits", null, httpRequest.getRequestURI()));
+                        .body(new ApiResponse<>(400, "Aadhaar number must be exactly 12 digits", null,httpRequest.getRequestURI()));
             }
 
             if (!authService.verifyAadhaar(aadhaar)) {
@@ -63,6 +63,7 @@ public class AuthController {
             return ResponseEntity.status(response.getStatus()).body(response);
         } catch (Exception e) {
             logger.error("Signup failed: {}", e.getMessage());
+            System.out.println(e.getMessage());
             return ResponseEntity.status(500)
                     .body(new ApiResponse<>(500, "Registration failed: " + e.getMessage(), null, httpRequest.getRequestURI()));
         }
