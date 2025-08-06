@@ -8,4 +8,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     long countByRolesContaining(com.cityzen.auth.enums.Role role);
     Optional<User> findByRefreshToken(String refreshToken);
     long countByGenderIgnoreCase(String gender);
+
+    Optional<User> findUserByAadhaar(String email);
 }

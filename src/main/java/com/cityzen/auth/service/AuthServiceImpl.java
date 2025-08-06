@@ -232,4 +232,13 @@ public class AuthServiceImpl implements AuthService {
     public int getgenderCount(String gender) {
         return (int) userRepository.countByGenderIgnoreCase(gender);
     }
+
+    @Override
+    public long doesUserExist(String email) {
+        Optional<User> user =  userRepository.findUserByAadhaar(email);
+        if(user == null){
+            return 0;
+        }
+        return Long.parseLong(user.get().getAadhaar());
+    }
 }

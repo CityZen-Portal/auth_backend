@@ -16,4 +16,6 @@ public interface AuthService {
     int getCitizenCount();
     JwtResponse refreshToken(RefreshTokenRequest request);
     int getgenderCount(String gender );
+
+    long doesUserExist(String email);
 }

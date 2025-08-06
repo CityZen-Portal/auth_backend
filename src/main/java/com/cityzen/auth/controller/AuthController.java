@@ -1,11 +1,13 @@
 package com.cityzen.auth.controller;
 
+import com.cityzen.auth.entity.User;
 import com.cityzen.auth.payload.ApiResponse;
 import com.cityzen.auth.dto.*;
 import com.cityzen.auth.service.AadhaarRegistryService;
 import com.cityzen.auth.service.AuthService;
 import com.cityzen.auth.service.EmailService;
 import com.cityzen.auth.service.OtpService;
+import org.apache.coyote.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import jakarta.servlet.http.HttpServletRequest;
@@ -217,4 +219,27 @@ public class AuthController {
             return ResponseEntity.status(400).body(new ApiResponse<>(500, "Internal Server Error", e.getMessage(), httpRequest.getRequestURI()));
         }
     }
+
+
+    @GetMapping("/getUser/{email}")
+    public ResponseEntity<ApiResponse<?>> getUser(@PathVariable String email, HttpServletRequest httpRequest) {
+        try{
+
+            long aadharNumber = authService.doesUserExist(email);
+
+            if(aadharNumber == 0){
+                return ResponseEntity.status(404).body(new ApiResponse<>(404, "User not found", null, httpRequest.getRequestURI()));
+            }
+
+            return ResponseEntity.ok(new ApiResponse<>(200, "OK", aadharNumber, httpRequest.getRequestURI()));
+
+
+
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(new ApiResponse<>(500, "Internal Server Error", e.getMessage(), httpRequest.getRequestURI()));
+        }
+    }
+
+
+
 }
