@@ -76,7 +76,12 @@ public class AuthServiceImpl implements AuthService {
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setAadhaar(request.getAadhaar());
-        user.setRoles(Collections.singleton(Role.CITIZEN));
+       if(request.getRole() == Role.STAFF) {
+           user.setRoles(Collections.singleton(Role.STAFF));
+       }
+       else{
+           user.setRoles(Collections.singleton(Role.CITIZEN));
+       }
         user.setGender(request.getGender());
 
         userRepository.save(user);
