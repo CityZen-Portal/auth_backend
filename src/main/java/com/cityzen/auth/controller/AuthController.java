@@ -3,11 +3,7 @@ package com.cityzen.auth.controller;
 import com.cityzen.auth.entity.User;
 import com.cityzen.auth.payload.ApiResponse;
 import com.cityzen.auth.dto.*;
-import com.cityzen.auth.service.AadhaarRegistryService;
-import com.cityzen.auth.service.AuthService;
-import com.cityzen.auth.service.EmailService;
-import com.cityzen.auth.service.OtpService;
-import com.cityzen.auth.service.UserValidationService;
+import com.cityzen.auth.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -36,6 +34,8 @@ public class AuthController {
     private EmailService emailService;
     @Autowired
     private UserValidationService userValidationService;
+    @Autowired
+    private CustomUserDetailsService customUserDetailsService;
 
     @PostMapping("/validate-user-and-aadhaar")
     public ResponseEntity<ApiResponse<?>> validateUserAndAadhaar(
@@ -248,16 +248,15 @@ public class AuthController {
     @GetMapping("/getUser/{email}")
     public ResponseEntity<ApiResponse<?>> getUser(@PathVariable String email, HttpServletRequest httpRequest) {
         try {
-            if(email == "" || email == null){
-                return ResponseEntity.status(400).body(new ApiResponse<>(400, "Invalid email", null, httpRequest.getRequestURI()));
+            if(Objects.equals(email, "") || email == null){
+                ResponseEntity<ApiResponse<?>> invalidEmail = ResponseEntity.status(400).body(new ApiResponse<>(400, "Invalid email", null, httpRequest.getRequestURI()));
+                return invalidEmail;
             }
-            Long aadharNumber = authService.doesUserExist(email);
-            if(aadharNumber == null){
-                return ResponseEntity.status(404).body(new ApiResponse<>(404, "User not found", null, httpRequest.getRequestURI()));
-            }
-            return ResponseEntity.ok(new ApiResponse<>(200, "OK", aadharNumber, httpRequest.getRequestURI()));
+            User user = customUserDetailsService.getUserByEmail(email);
+            return ResponseEntity.ok(new ApiResponse<>(200, "OK", user, httpRequest.getRequestURI()));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body(new ApiResponse<>(500, "Internal Server Error", e.getMessage(), httpRequest.getRequestURI()));
+            ResponseEntity<ApiResponse<?>> internalServerError = ResponseEntity.status(500).body(new ApiResponse<>(500, "Internal Server Error", e.getMessage(), httpRequest.getRequestURI()));
+            return internalServerError;
         }
     }
 
