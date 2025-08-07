@@ -20,10 +20,6 @@ SignUpRequest {
     private String gender;
 
     public boolean isValidPassword() {
-        return password != null && password.length() >= 8 &&
-                password.matches(".*[A-Z].*") &&
-                password.matches(".*[a-z].*") &&
-                password.matches(".*[0-9].*") &&
-                password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?].*");
+        return password != null;
     }
 }
