@@ -99,11 +99,13 @@ public class AuthServiceImpl implements AuthService {
 
         String accessToken = jwtUtil.generateToken(user.getEmail(), roles.get(0));
         String refreshToken = jwtUtil.generateRefreshToken(user.getEmail());
+
         user.setRefreshToken(refreshToken);
         user.setRefreshTokenExpiry(Instant.now().plusMillis(jwtUtil.getRefreshTokenExpirationMillis()));
         userRepository.save(user);
 
         return new JwtResponse(
+                user.getId(),
                 accessToken,
                 refreshToken,
                 roles,
@@ -130,6 +132,7 @@ public class AuthServiceImpl implements AuthService {
         userRepository.save(user);
 
         return new JwtResponse(
+                user.getId(),
                 accessToken,
                 refreshToken,
                 roles,
@@ -220,6 +223,7 @@ public class AuthServiceImpl implements AuthService {
         userRepository.save(user);
 
         return new JwtResponse(
+                user.getId(),
                 accessToken,
                 refreshToken,
                 roles,
