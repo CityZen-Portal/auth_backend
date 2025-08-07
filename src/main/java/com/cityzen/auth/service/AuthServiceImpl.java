@@ -76,11 +76,11 @@ public class AuthServiceImpl implements AuthService {
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setAadhaar(request.getAadhaar());
-       if(request.getRole() == Role.ROLE_STAFF) {
-           user.setRoles(Collections.singleton(Role.ROLE_STAFF));
+       if(request.getRole() == Role.STAFF) {
+           user.setRoles(Collections.singleton(Role.STAFF));
        }
        else{
-           user.setRoles(Collections.singleton(Role.ROLE_USER));
+           user.setRoles(Collections.singleton(Role.CITIZEN));
        }
         user.setGender(request.getGender());
 
@@ -205,7 +205,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public int getCitizenCount() {
-        return (int) userRepository.countByRolesContaining(com.cityzen.auth.enums.Role.ROLE_USER);
+        return (int) userRepository.countByRolesContaining(com.cityzen.auth.enums.Role.CITIZEN);
     }
 
     @Override
