@@ -261,4 +261,14 @@ public class AuthController {
         }
     }
 
+    @GetMapping("/validate")
+    public ResponseEntity<TokenResponseDto> validateUser(@RequestHeader("token") String token) {
+        try {
+            TokenResponseDto response = userValidationService.validateUser(token);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body(new TokenResponseDto(false, null, "Invalid or expired token"));
+        }
+    }
+
 }
