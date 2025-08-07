@@ -22,7 +22,7 @@ public class DataInitializer {
                 admin.setUserName("admin");
                 admin.setEmail("admin@admin.com");
                 admin.setPassword(encoder.encode("admin@admin.com"));
-                admin.setRoles(Set.of(Role.ADMIN));
+                admin.setRoles(Set.of(Role.ROLE_ADMIN));
                 userRepository.save(admin);
             }
 
@@ -31,7 +31,7 @@ public class DataInitializer {
                 user.setUserName("user");
                 user.setEmail("user@user.com");
                 user.setPassword(encoder.encode("user@user.com"));
-                user.setRoles(Set.of(Role.CITIZEN));
+                user.setRoles(Set.of(Role.ROLE_USER));
                 userRepository.save(user);
             }
 
@@ -40,7 +40,7 @@ public class DataInitializer {
                 staff.setUserName("staff");
                 staff.setEmail("staff@staff.com");
                 staff.setPassword(encoder.encode("staff@staff.com"));
-                staff.setRoles(Set.of(Role.STAFF));
+                staff.setRoles(Set.of(Role.ROLE_STAFF));
                 userRepository.save(staff);
             }
         };
