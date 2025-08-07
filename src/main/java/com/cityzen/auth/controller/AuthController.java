@@ -7,7 +7,7 @@ import com.cityzen.auth.service.AadhaarRegistryService;
 import com.cityzen.auth.service.AuthService;
 import com.cityzen.auth.service.EmailService;
 import com.cityzen.auth.service.OtpService;
-import org.apache.coyote.Response;
+import com.cityzen.auth.service.UserValidationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,9 +17,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Optional;
-
 
 @RestController
 @RequestMapping("/api/auth")
@@ -37,6 +34,35 @@ public class AuthController {
     private AadhaarRegistryService service;
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private UserValidationService userValidationService;
+
+    @PostMapping("/validate-user-and-aadhaar")
+    public ResponseEntity<ApiResponse<?>> validateUserAndAadhaar(
+            @RequestHeader("Authorization") String authHeader,
+            @RequestBody FileUploadDto fileUploadDto,
+            HttpServletRequest request) {
+
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new ApiResponse<>(401, "Missing or invalid Authorization header", null, request.getRequestURI()));
+        }
+
+        String token = authHeader.substring(7);
+        TokenResponseDto tokenResponseDto = userValidationService.validateUser(token);
+        if (!tokenResponseDto.isValid()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new ApiResponse<>(401, "UNAUTHORIZED USER", null, request.getRequestURI()));
+        }
+
+        boolean aadhaarExists = authService.verifyAadhaar(fileUploadDto.getAadharNumber());
+        if (!aadhaarExists) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiResponse<>(404, "AADHAAR NOT FOUND", null, request.getRequestURI()));
+        }
+
+        return ResponseEntity.ok(new ApiResponse<>(200, "SUCCESS", null, request.getRequestURI()));
+    }
 
     @PostMapping("/verify-aadhaar")
     public ResponseEntity<ApiResponse<Boolean>> verifyAadhaar(@RequestBody AadhaarVerifyRequest request, HttpServletRequest httpRequest) {
@@ -51,13 +77,11 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<?>> register(@RequestBody SignUpRequest request, HttpServletRequest httpRequest) {
         try {
-
             String aadhaar = request.getAadhaar();
             if (aadhaar == null || !aadhaar.matches("\\d{12}")) {
                 return ResponseEntity.status(400)
                         .body(new ApiResponse<>(400, "Aadhaar number must be exactly 12 digits", null,httpRequest.getRequestURI()));
             }
-
             if (!authService.verifyAadhaar(aadhaar)) {
                 return ResponseEntity.status(400)
                         .body(new ApiResponse<>(400, "Aadhaar number not verified or not found", null, httpRequest.getRequestURI()));
@@ -179,7 +203,7 @@ public class AuthController {
         String response = service.saveAadhaar(aadhaar);
         return ResponseEntity.ok(new ApiResponse<>(200, response, null, httpRequest.getRequestURI()));
     }
-    
+
     @GetMapping("/get-count/citizen")
     public ResponseEntity<ApiResponse<Integer>> getCitizenCount(HttpServletRequest httpRequest) {
         int count = authService.getCitizenCount();
@@ -207,7 +231,6 @@ public class AuthController {
     @GetMapping("/get-count/gender")
     public ResponseEntity<ApiResponse<?>> getGenderCount(HttpServletRequest httpRequest) {
         try {
-
             int maleCount = authService.getgenderCount("male");
             int femaleCount = authService.getgenderCount("female");
             int otherCount = authService.getgenderCount("other");
@@ -222,30 +245,20 @@ public class AuthController {
         }
     }
 
-
     @GetMapping("/getUser/{email}")
     public ResponseEntity<ApiResponse<?>> getUser(@PathVariable String email, HttpServletRequest httpRequest) {
-        try{
-
+        try {
             if(email == "" || email == null){
                 return ResponseEntity.status(400).body(new ApiResponse<>(400, "Invalid email", null, httpRequest.getRequestURI()));
             }
-           Long aadharNumber = authService.doesUserExist(email);
-
+            Long aadharNumber = authService.doesUserExist(email);
             if(aadharNumber == null){
                 return ResponseEntity.status(404).body(new ApiResponse<>(404, "User not found", null, httpRequest.getRequestURI()));
             }
             return ResponseEntity.ok(new ApiResponse<>(200, "OK", aadharNumber, httpRequest.getRequestURI()));
-
         } catch (Exception e) {
             return ResponseEntity.status(500).body(new ApiResponse<>(500, "Internal Server Error", e.getMessage(), httpRequest.getRequestURI()));
         }
     }
-
-
-
-    
-
-
 
 }
