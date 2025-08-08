@@ -16,7 +16,7 @@ SignUpRequest {
     private String password;
     @NotBlank
     private String aadhaar;
-    private Role role;;
+    private Role role;
     private String gender;
 
     public boolean isValidPassword() {
