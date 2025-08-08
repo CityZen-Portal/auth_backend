@@ -115,7 +115,7 @@ public class AuthServiceImpl implements AuthService {
                 refreshToken,
                 roles,
                 user.getEmail(),
-                System.currentTimeMillis() + 18000000
+                System.currentTimeMillis() + 86400000
         );
     }
 
@@ -142,7 +142,7 @@ public class AuthServiceImpl implements AuthService {
                 refreshToken,
                 roles,
                 user.getEmail(),
-                System.currentTimeMillis() + 18000000
+                System.currentTimeMillis() + 86400000
         );
     }
 
