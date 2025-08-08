@@ -1,9 +1,9 @@
 package com.cityzen.auth.entity;
 
+import com.cityzen.auth.enums.Gender;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Data
 @Entity
@@ -18,33 +18,16 @@ public class AdminProfile {
     private String firstName;
     private String lastName;
     private String email;
-    private String gender;
+
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
+
     private LocalDate dob;
+    private String designation;
+    private LocalDate joinedAt;
     private String address;
     private String city;
     private String state;
     private String pincode;
     private String phoneNo;
-
-    @Enumerated(EnumType.STRING)
-    private AccessLevel accessLevel;
-
-    @Enumerated(EnumType.STRING)
-    private Status status;
-
-    private LocalDateTime lastLogin;
-
-    public enum AccessLevel {
-        ADMIN,
-        SUPER_ADMIN,
-        SERVICE_MANAGER,
-        COMPLAINT_MANAGER,
-        READ_ONLY_ADMIN
-    }
-
-    public enum Status {
-        ACTIVE,
-        INACTIVE,
-        SUSPENDED
-    }
 }

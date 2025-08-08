@@ -38,16 +38,15 @@ public class AdminProfileController {
         response.setFirstName(profile.getFirstName());
         response.setLastName(profile.getLastName());
         response.setEmail(profile.getEmail());
-        response.setGender(profile.getGender());
         response.setDob(profile.getDob());
+        response.setGender(profile.getGender());
+        response.setDesignation(profile.getDesignation());
+        response.setJoinedAt(profile.getJoinedAt());
         response.setAddress(profile.getAddress());
         response.setCity(profile.getCity());
         response.setState(profile.getState());
         response.setPincode(profile.getPincode());
         response.setPhoneNo(profile.getPhoneNo());
-        response.setAccessLevel(profile.getAccessLevel());
-        response.setStatus(profile.getStatus());
-        response.setLastLogin(profile.getLastLogin());
         return response;
     }
 }

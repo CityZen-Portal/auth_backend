@@ -27,17 +27,17 @@ public class AdminProfileService {
 
         profile.setFirstName(updated.getFirstName());
         profile.setLastName(updated.getLastName());
+        profile.setAdminId(updated.getAdminId());
         profile.setEmail(updated.getEmail());
-        profile.setGender(updated.getGender());
         profile.setDob(updated.getDob());
+        profile.setGender(updated.getGender());
+        profile.setDesignation(updated.getDesignation());
+        profile.setJoinedAt(updated.getJoinedAt());
         profile.setAddress(updated.getAddress());
         profile.setCity(updated.getCity());
         profile.setState(updated.getState());
         profile.setPincode(updated.getPincode());
         profile.setPhoneNo(updated.getPhoneNo());
-        profile.setAccessLevel(updated.getAccessLevel());
-        profile.setStatus(updated.getStatus());
-        profile.setLastLogin(updated.getLastLogin());
 
         return repository.save(profile);
     }
