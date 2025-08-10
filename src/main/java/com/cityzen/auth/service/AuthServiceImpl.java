@@ -1,5 +1,6 @@
 package com.cityzen.auth.service;
 
+import com.cityzen.auth.entity.CitizenProfile;
 import com.cityzen.auth.payload.ApiResponse;
 import com.cityzen.auth.dto.*;
 import com.cityzen.auth.entity.ForgotPasswordToken;
@@ -7,6 +8,7 @@ import com.cityzen.auth.entity.User;
 import com.cityzen.auth.enums.Role;
 import com.cityzen.auth.exception.CustomException;
 import com.cityzen.auth.repository.AadhaarRegistryRepository;
+import com.cityzen.auth.repository.CitizenProfileRepository;
 import com.cityzen.auth.repository.ForgotPasswordTokenRepository;
 import com.cityzen.auth.repository.UserRepository;
 import com.cityzen.auth.util.JwtUtil;
@@ -37,6 +39,9 @@ public class AuthServiceImpl implements AuthService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private CitizenProfileRepository citizenProfileRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -86,6 +91,14 @@ public class AuthServiceImpl implements AuthService {
 
         userRepository.save(user);
 
+        CitizenProfile profile = new CitizenProfile();
+        profile.setCitizenId("CIT" + user.getId());
+        profile.setUserName(request.getUserName());
+        profile.setEmail(request.getEmail());
+        profile.setAadhaar(request.getAadhaar());
+        profile.setGender(request.getGender());
+        citizenProfileRepository.save(profile);
+
         return new ApiResponse<>(200, "Registration successful", null, "/auth/register");
     }
 
@@ -96,6 +109,17 @@ public class AuthServiceImpl implements AuthService {
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new CustomException("Invalid password", HttpStatus.UNAUTHORIZED);
+        }
+
+        String citizenId = "CIT" + user.getId();
+        if (citizenProfileRepository.findByCitizenId(citizenId).isEmpty()) {
+            CitizenProfile profile = new CitizenProfile();
+            profile.setCitizenId(citizenId);
+            profile.setUserName(user.getUserName());
+            profile.setEmail(user.getEmail());
+            profile.setAadhaar(user.getAadhaar());
+            profile.setGender(user.getGender());
+            citizenProfileRepository.save(profile);
         }
 
         List<String> roles = user.getRoles().stream()
