@@ -115,6 +115,17 @@ public class AuthServiceImpl implements AuthService {
             throw new CustomException("Invalid password", HttpStatus.UNAUTHORIZED);
         }
 
+        String citizenId = "CIT" + user.getId();
+        if (citizenProfileRepository.findByCitizenId(citizenId).isEmpty()) {
+            CitizenProfile profile = new CitizenProfile();
+            profile.setCitizenId(citizenId);
+            profile.setUserName(user.getUserName());
+            profile.setEmail(user.getEmail());
+            profile.setAadhaar(user.getAadhaar());
+            profile.setGender(user.getGender());
+            citizenProfileRepository.save(profile);
+        }
+
         List<String> roles = user.getRoles().stream()
                 .map(Enum::name)
                 .toList();

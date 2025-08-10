@@ -27,7 +27,6 @@ public class CitizenProfileService {
 
         profile.setUserName(updated.getUserName());
         profile.setEmail(updated.getEmail());
-        profile.setAadhaar(updated.getAadhaar());
         profile.setGender(updated.getGender());
         profile.setAddress(updated.getAddress());
         profile.setCity(updated.getCity());
