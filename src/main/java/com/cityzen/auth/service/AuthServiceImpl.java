@@ -10,6 +10,7 @@ import com.cityzen.auth.repository.AadhaarRegistryRepository;
 import com.cityzen.auth.repository.ForgotPasswordTokenRepository;
 import com.cityzen.auth.repository.UserRepository;
 import com.cityzen.auth.util.JwtUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
@@ -253,6 +254,22 @@ public class AuthServiceImpl implements AuthService {
         long res = Long.parseLong(user.get().getAadhaar());
 
         return res;
+    }
+
+    @Override
+    public ApiResponse staffPasswordUpdate(String email,String password )
+    {
+        Optional<User> staff=userRepository.findByEmail(email);
+        if(staff.isEmpty())
+        {
+            return new ApiResponse(404,"Email is Not Registered",staff,null);
+
+        }
+        else{
+            staff.get().setPassword(passwordEncoder.encode(password));
+            userRepository.save(staff.get());
+            return new ApiResponse<>(200,"Password reset Successfully",null,null);
+        }
     }
 
 

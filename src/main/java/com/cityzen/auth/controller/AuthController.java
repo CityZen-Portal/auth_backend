@@ -270,4 +270,11 @@ public class AuthController {
         }
     }
 
+    @PutMapping("/staff/reset")
+    public ResponseEntity<ApiResponse<?>> resetPassword(@RequestBody ResetStaffPasswordRequest request) {
+        ApiResponse<?> response = authService.staffPasswordUpdate(request.getEmail(), request.getPassword());
+        return ResponseEntity.ok(response);
+    }
+
+
 }
