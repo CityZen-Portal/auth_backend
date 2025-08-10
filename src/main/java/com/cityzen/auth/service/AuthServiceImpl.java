@@ -1,5 +1,6 @@
 package com.cityzen.auth.service;
 
+import com.cityzen.auth.entity.CitizenProfile;
 import com.cityzen.auth.payload.ApiResponse;
 import com.cityzen.auth.dto.*;
 import com.cityzen.auth.entity.ForgotPasswordToken;
@@ -7,9 +8,11 @@ import com.cityzen.auth.entity.User;
 import com.cityzen.auth.enums.Role;
 import com.cityzen.auth.exception.CustomException;
 import com.cityzen.auth.repository.AadhaarRegistryRepository;
+import com.cityzen.auth.repository.CitizenProfileRepository;
 import com.cityzen.auth.repository.ForgotPasswordTokenRepository;
 import com.cityzen.auth.repository.UserRepository;
 import com.cityzen.auth.util.JwtUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
@@ -39,6 +42,9 @@ public class AuthServiceImpl implements AuthService {
     private UserRepository userRepository;
 
     @Autowired
+    private CitizenProfileRepository citizenProfileRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
@@ -64,10 +70,12 @@ public class AuthServiceImpl implements AuthService {
         }
 
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            System.out.print("Email");
             throw new CustomException("Email already in use", HttpStatus.CONFLICT);
         }
 
         if (userRepository.findByAadhaar(request.getAadhaar()).isPresent()) {
+            System.out.print("Password");
             throw new CustomException("Aadhaar already registered", HttpStatus.CONFLICT);
         }
 
@@ -76,15 +84,24 @@ public class AuthServiceImpl implements AuthService {
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setAadhaar(request.getAadhaar());
-       if(request.getRole() == Role.STAFF) {
-           user.setRoles(Collections.singleton(Role.STAFF));
-       }
-       else{
+        System.out.print(request);
+        if (request.getRole()==Role.STAFF) {
+            user.setRoles(Collections.singleton(Role.STAFF));
+        }
+        else{
            user.setRoles(Collections.singleton(Role.CITIZEN));
        }
         user.setGender(request.getGender());
 
         userRepository.save(user);
+
+        CitizenProfile profile = new CitizenProfile();
+        profile.setCitizenId("CIT" + user.getId());
+        profile.setUserName(request.getUserName());
+        profile.setEmail(request.getEmail());
+        profile.setAadhaar(request.getAadhaar());
+        profile.setGender(request.getGender());
+        citizenProfileRepository.save(profile);
 
         return new ApiResponse<>(200, "Registration successful", null, "/auth/register");
     }
@@ -111,6 +128,7 @@ public class AuthServiceImpl implements AuthService {
 
         return new JwtResponse(
                 user.getId(),
+                user.getUserName(),
                 accessToken,
                 refreshToken,
                 roles,
@@ -138,6 +156,7 @@ public class AuthServiceImpl implements AuthService {
 
         return new JwtResponse(
                 user.getId(),
+                user.getUserName(),
                 accessToken,
                 refreshToken,
                 roles,
@@ -229,6 +248,7 @@ public class AuthServiceImpl implements AuthService {
 
         return new JwtResponse(
                 user.getId(),
+                user.getUserName(),
                 accessToken,
                 refreshToken,
                 roles,
@@ -252,5 +272,30 @@ public class AuthServiceImpl implements AuthService {
         return res;
     }
 
+    @Override
+    public ApiResponse staffPasswordUpdate(String email,String password )
+    {
+        Optional<User> staff=userRepository.findByEmail(email);
+        if(staff.isEmpty())
+        {
+            return new ApiResponse(404,"Email is Not Registered",staff,null);
+
+        }
+        else{
+            staff.get().setPassword(passwordEncoder.encode(password));
+            userRepository.save(staff.get());
+            return new ApiResponse<>(200,"Password reset Successfully",null,null);
+        }
+    }
+    @Override
+    public boolean deleteStaff(String email) {
+        Optional<User> staff=userRepository.findByEmail(email);
+        if(staff.isEmpty())
+            return false;
+        else{
+            userRepository.delete(staff.get());
+            return true;
+        }
+    }
 
 }

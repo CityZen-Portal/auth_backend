@@ -3,6 +3,7 @@ package com.cityzen.auth.service;
 import com.cityzen.auth.payload.ApiResponse;
 import com.cityzen.auth.dto.*;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.core.Authentication;
 
 import java.util.Optional;
@@ -18,6 +19,8 @@ public interface AuthService {
     int getCitizenCount();
     JwtResponse refreshToken(RefreshTokenRequest request);
     int getgenderCount(String gender );
-
     Long doesUserExist(String email);
+     ApiResponse staffPasswordUpdate(String email, String password);
+     boolean deleteStaff(String email);
+
 }
