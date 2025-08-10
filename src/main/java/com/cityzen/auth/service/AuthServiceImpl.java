@@ -274,6 +274,15 @@ public class AuthServiceImpl implements AuthService {
             return new ApiResponse<>(200,"Password reset Successfully",null,null);
         }
     }
-
+    @Override
+    public boolean deleteStaff(String email) {
+        Optional<User> staff=userRepository.findByEmail(email);
+        if(staff.isEmpty())
+            return false;
+        else{
+            userRepository.delete(staff.get());
+            return true;
+        }
+    }
 
 }

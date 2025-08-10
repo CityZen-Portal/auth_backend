@@ -21,6 +21,7 @@ public interface AuthService {
     int getgenderCount(String gender );
 
     Long doesUserExist(String email);
-    public ApiResponse staffPasswordUpdate(String email, String password);
+     ApiResponse staffPasswordUpdate(String email, String password);
+     boolean deleteStaff(String email);
 
 }

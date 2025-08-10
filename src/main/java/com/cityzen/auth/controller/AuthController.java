@@ -276,5 +276,10 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
+    @DeleteMapping("/delete/{email}")
+    public boolean deleteStaff(@PathVariable String email)
+    {
+        return authService.deleteStaff(email);
+    }
 
 }
