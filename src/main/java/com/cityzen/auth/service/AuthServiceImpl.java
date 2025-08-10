@@ -64,10 +64,12 @@ public class AuthServiceImpl implements AuthService {
         }
 
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            System.out.print("Email");
             throw new CustomException("Email already in use", HttpStatus.CONFLICT);
         }
 
         if (userRepository.findByAadhaar(request.getAadhaar()).isPresent()) {
+            System.out.print("Password");
             throw new CustomException("Aadhaar already registered", HttpStatus.CONFLICT);
         }
 
@@ -76,10 +78,11 @@ public class AuthServiceImpl implements AuthService {
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setAadhaar(request.getAadhaar());
-       if(request.getRole() == Role.STAFF) {
-           user.setRoles(Collections.singleton(Role.STAFF));
-       }
-       else{
+        System.out.print(request);
+        if (request.getRole()==Role.STAFF) {
+            user.setRoles(Collections.singleton(Role.STAFF));
+        }
+        else{
            user.setRoles(Collections.singleton(Role.CITIZEN));
        }
         user.setGender(request.getGender());
