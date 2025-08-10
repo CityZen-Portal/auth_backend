@@ -19,7 +19,6 @@ public interface AuthService {
     int getCitizenCount();
     JwtResponse refreshToken(RefreshTokenRequest request);
     int getgenderCount(String gender );
-
     Long doesUserExist(String email);
      ApiResponse staffPasswordUpdate(String email, String password);
      boolean deleteStaff(String email);
