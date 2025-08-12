@@ -287,7 +287,9 @@ public class AuthServiceImpl implements AuthService {
     public User getUserById(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
-      
+    }
+
+    @Override
     public ApiResponse staffPasswordUpdate(String email,String password )
     {
         Optional<User> staff=userRepository.findByEmail(email);
