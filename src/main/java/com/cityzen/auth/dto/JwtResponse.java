@@ -10,6 +10,7 @@ import java.util.List;
 @NoArgsConstructor
 public class JwtResponse {
     private Long id;
+    private String userName;
     private String accessToken;
     private String refreshToken;
     private List<String> roles;

@@ -130,7 +130,7 @@ public class AuthController {
     public ResponseEntity<ApiResponse<String>> forgotPassword(@RequestBody ForgotPasswordRequest request, HttpServletRequest httpRequest) {
         try {
             authService.forgotPassword(request);
-            return ResponseEntity.ok(new ApiResponse<>(200, "Password reset email sent", null, httpRequest.getRequestURI()));
+            return ResponseEntity.ok(new ApiResponse<>(200, "Password reset link sent", null, httpRequest.getRequestURI()));
         } catch (Exception e) {
             logger.error("Forgot password failed: {}", e.getMessage());
             return ResponseEntity.status(500).body(new ApiResponse<>(500, "Failed to send password reset email: " + e.getMessage(), null, httpRequest.getRequestURI()));
@@ -269,7 +269,7 @@ public class AuthController {
             return ResponseEntity.status(401).body(new TokenResponseDto(false, null, "Invalid or expired token"));
         }
     }
-
+  
     @GetMapping("/getUserById/{userId}")
     public ResponseEntity<ApiResponse<?>> getUserById(@PathVariable Long userId, HttpServletRequest httpRequest) {
         try {
@@ -278,6 +278,17 @@ public class AuthController {
         } catch (Exception e) {
             return ResponseEntity.status(500).body(new ApiResponse<>(500, "Internal Server Error", e.getMessage(), httpRequest.getRequestURI()));
         }
+      
+    @PutMapping("/staff/reset")
+    public ResponseEntity<ApiResponse<?>> resetPassword(@RequestBody ResetStaffPasswordRequest request) {
+        ApiResponse<?> response = authService.staffPasswordUpdate(request.getEmail(), request.getPassword());
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/delete/{email}")
+    public boolean deleteStaff(@PathVariable String email)
+    {
+        return authService.deleteStaff(email
     }
 
 }
