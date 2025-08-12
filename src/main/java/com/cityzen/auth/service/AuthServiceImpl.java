@@ -276,5 +276,10 @@ public class AuthServiceImpl implements AuthService {
         return res;
     }
 
+    @Override
+    public User getUserById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
+    }
 
 }

@@ -270,4 +270,14 @@ public class AuthController {
         }
     }
 
+    @GetMapping("/getUserById/{userId}")
+    public ResponseEntity<ApiResponse<?>> getUserById(@PathVariable Long userId, HttpServletRequest httpRequest) {
+        try {
+            User user = customUserDetailsService.getUserById(userId);
+            return ResponseEntity.ok(new ApiResponse<>(200, "OK", user, httpRequest.getRequestURI()));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(new ApiResponse<>(500, "Internal Server Error", e.getMessage(), httpRequest.getRequestURI()));
+        }
+    }
+
 }
