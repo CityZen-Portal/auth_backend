@@ -269,7 +269,16 @@ public class AuthController {
             return ResponseEntity.status(401).body(new TokenResponseDto(false, null, "Invalid or expired token"));
         }
     }
-
+  
+    @GetMapping("/getUserById/{userId}")
+    public ResponseEntity<ApiResponse<?>> getUserById(@PathVariable Long userId, HttpServletRequest httpRequest) {
+        try {
+            User user = customUserDetailsService.getUserById(userId);
+            return ResponseEntity.ok(new ApiResponse<>(200, "OK", user, httpRequest.getRequestURI()));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(new ApiResponse<>(500, "Internal Server Error", e.getMessage(), httpRequest.getRequestURI()));
+        }
+      
     @PutMapping("/staff/reset")
     public ResponseEntity<ApiResponse<?>> resetPassword(@RequestBody ResetStaffPasswordRequest request) {
         ApiResponse<?> response = authService.staffPasswordUpdate(request.getEmail(), request.getPassword());
@@ -279,7 +288,7 @@ public class AuthController {
     @DeleteMapping("/delete/{email}")
     public boolean deleteStaff(@PathVariable String email)
     {
-        return authService.deleteStaff(email);
+        return authService.deleteStaff(email
     }
 
 }

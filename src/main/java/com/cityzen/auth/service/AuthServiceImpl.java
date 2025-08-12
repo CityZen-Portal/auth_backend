@@ -284,6 +284,10 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    public User getUserById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
+      
     public ApiResponse staffPasswordUpdate(String email,String password )
     {
         Optional<User> staff=userRepository.findByEmail(email);
@@ -298,6 +302,7 @@ public class AuthServiceImpl implements AuthService {
             return new ApiResponse<>(200,"Password reset Successfully",null,null);
         }
     }
+      
     @Override
     public boolean deleteStaff(String email) {
         Optional<User> staff=userRepository.findByEmail(email);
@@ -307,6 +312,7 @@ public class AuthServiceImpl implements AuthService {
             userRepository.delete(staff.get());
             return true;
         }
+
     }
 
 }
