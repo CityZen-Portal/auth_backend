@@ -279,5 +279,4 @@ public class AuthController {
             return ResponseEntity.status(500).body(new ApiResponse<>(500, "Internal Server Error", e.getMessage(), httpRequest.getRequestURI()));
         }
     }
-
 }
