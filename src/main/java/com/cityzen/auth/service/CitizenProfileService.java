@@ -33,6 +33,7 @@ public class CitizenProfileService {
         profile.setState(updated.getState());
         profile.setPincode(updated.getPincode());
         profile.setDob(updated.getDob());
+        profile.setProfileUrl(updated.getProfileUrl());
 
         return repository.save(profile);
     }
