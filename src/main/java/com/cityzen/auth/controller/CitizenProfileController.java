@@ -46,6 +46,7 @@ public class CitizenProfileController {
         response.setState(profile.getState());
         response.setPincode(profile.getPincode());
         response.setAadhaar(profile.getAadhaar());
+        response.setProfileUrl(profile.getProfileUrl());
         return response;
     }
 }

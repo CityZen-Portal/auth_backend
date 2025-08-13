@@ -14,4 +14,5 @@ public class CitizenProfileResponse {
     private String state;
     private String pincode;
     private String dob;
+    private String profileUrl;
 }
