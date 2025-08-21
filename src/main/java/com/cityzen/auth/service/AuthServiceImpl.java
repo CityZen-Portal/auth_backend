@@ -100,11 +100,11 @@ public class AuthServiceImpl implements AuthService {
         refreshTokenService.createRefreshToken(savedUser);
 
         CitizenProfile profile = new CitizenProfile();
-        profile.setCitizenId("CIT" + user.getId());
-        profile.setUserName(request.getUserName());
-        profile.setEmail(request.getEmail());
-        profile.setAadhaar(request.getAadhaar());
-        profile.setGender(request.getGender());
+        profile.setCitizenId("CIT" + savedUser.getId());
+        profile.setUserName(savedUser.getUserName());
+        profile.setEmail(savedUser.getEmail());
+        profile.setAadhaar(savedUser.getAadhaar());
+        profile.setGender(savedUser.getGender());
         citizenProfileRepository.save(profile);
 
         return new ApiResponse<>(200, "Registration successful", null, "/auth/register");
