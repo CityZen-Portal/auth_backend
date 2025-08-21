@@ -283,7 +283,7 @@ public class AuthServiceImpl implements AuthService {
                 refreshToken,
                 roles,
                 user.getEmail(),
-                System.currentTimeMillis() + 86400000
+                System.currentTimeMillis() + 604800000
         );
     }
 
