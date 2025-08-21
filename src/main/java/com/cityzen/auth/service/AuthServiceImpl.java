@@ -177,6 +177,25 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    public JwtResponse generateNewAccessToken(User user, String refreshToken) {
+        List<String> roles = user.getRoles().stream()
+                .map(Enum::name)
+                .toList();
+
+        String accessToken = jwtUtil.generateToken(user.getEmail(), roles.isEmpty() ? "" : roles.get(0));
+
+        return new JwtResponse(
+                user.getId(),
+                user.getUserName(),
+                accessToken,
+                refreshToken,
+                roles,
+                user.getEmail(),
+                System.currentTimeMillis() + 86400000
+        );
+    }
+
+    @Override
     public void forgotPassword(ForgotPasswordRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new CustomException("User not found with email: " + request.getEmail(), HttpStatus.NOT_FOUND));
