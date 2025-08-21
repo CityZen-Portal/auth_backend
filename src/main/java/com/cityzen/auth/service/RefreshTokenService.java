@@ -38,6 +38,7 @@ public class RefreshTokenService {
         refreshTokenRepository.save(token);
 
         user.setRefreshToken(token.getToken());
+        user.setRefreshTokenExpiry(token.getExpiryDate());
         userRepository.save(user);
 
         return token;
