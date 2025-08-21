@@ -95,9 +95,9 @@ public class AuthServiceImpl implements AuthService {
            user.setRoles(Collections.singleton(Role.CITIZEN));
        }
         user.setGender(request.getGender());
+
         User savedUser = userRepository.save(user);
         refreshTokenService.createRefreshToken(savedUser);
-        userRepository.save(user);
 
         CitizenProfile profile = new CitizenProfile();
         profile.setCitizenId("CIT" + user.getId());
