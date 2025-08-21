@@ -34,10 +34,6 @@ public class CitizenProfileController {
         return toResponse(profile);
     }
 
-    // added comments
-    // added comments
-
-
     private CitizenProfileResponse toResponse(CitizenProfile profile) {
         CitizenProfileResponse response = new CitizenProfileResponse();
         response.setCitizenId(profile.getCitizenId());

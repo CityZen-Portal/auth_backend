@@ -52,7 +52,6 @@ public class AuthServiceImpl implements AuthService {
 
     @Autowired
     private EmailService emailService;
-
     @Autowired
     private RefreshTokenService refreshTokenService;
 
@@ -88,27 +87,33 @@ public class AuthServiceImpl implements AuthService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setAadhaar(request.getAadhaar());
         System.out.print(request);
-        if (request.getRole()==Role.STAFF) {
-            user.setRoles(Collections.singleton(Role.STAFF));
+//        if (request.getRole() == Role.STAFF) {
+//            user.setRoles(Collections.singleton(Role.STAFF));
+//        } else {
+//            user.setRoles(Collections.singleton(Role.CITIZEN));
+//        }
+        Set<Role> roles = new HashSet<>();
+        if (request.getRole() == Role.STAFF) {
+            roles.add(Role.STAFF);
+        } else {
+            roles.add(Role.CITIZEN);
         }
-        else{
-           user.setRoles(Collections.singleton(Role.CITIZEN));
-       }
-        user.setGender(request.getGender());
+        user.setRoles(roles);
 
-        User savedUser = userRepository.save(user);
-        refreshTokenService.createRefreshToken(savedUser);
+            user.setGender(request.getGender());
+            User savedUser = userRepository.save(user);
+            refreshTokenService.createRefreshToken(savedUser);
 
-        CitizenProfile profile = new CitizenProfile();
-        profile.setCitizenId("CIT" + savedUser.getId());
-        profile.setUserName(savedUser.getUserName());
-        profile.setEmail(savedUser.getEmail());
-        profile.setAadhaar(savedUser.getAadhaar());
-        profile.setGender(savedUser.getGender());
-        citizenProfileRepository.save(profile);
+            CitizenProfile profile = new CitizenProfile();
+            profile.setCitizenId("CIT" + savedUser.getId());
+            profile.setUserName(request.getUserName());
+            profile.setEmail(request.getEmail());
+            profile.setAadhaar(request.getAadhaar());
+            profile.setGender(request.getGender());
+            citizenProfileRepository.save(profile);
 
-        return new ApiResponse<>(200, "Registration successful", null, "/auth/register");
-    }
+            return new ApiResponse<>(200, "Registration successful", null, "/auth/register");
+        }
 
     @Override
     public JwtResponse login(SignInRequest request) {
