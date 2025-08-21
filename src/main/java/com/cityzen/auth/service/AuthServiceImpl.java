@@ -53,6 +53,9 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private RefreshTokenService refreshTokenService;
+
     private boolean isValidPassword(String password) {
         return password != null &&
                 password.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*#?&]).{8,}$");
@@ -92,7 +95,8 @@ public class AuthServiceImpl implements AuthService {
            user.setRoles(Collections.singleton(Role.CITIZEN));
        }
         user.setGender(request.getGender());
-
+        User savedUser = userRepository.save(user);
+        refreshTokenService.createRefreshToken(savedUser);
         userRepository.save(user);
 
         CitizenProfile profile = new CitizenProfile();
