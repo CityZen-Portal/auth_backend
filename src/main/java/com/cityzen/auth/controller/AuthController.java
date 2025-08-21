@@ -1,5 +1,6 @@
 package com.cityzen.auth.controller;
 
+import com.cityzen.auth.entity.RefreshToken;
 import com.cityzen.auth.entity.User;
 import com.cityzen.auth.payload.ApiResponse;
 import com.cityzen.auth.dto.*;
@@ -15,6 +16,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Objects;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -36,6 +38,8 @@ public class AuthController {
     private UserValidationService userValidationService;
     @Autowired
     private CustomUserDetailsService customUserDetailsService;
+    @Autowired
+    private RefreshTokenService refreshTokenService;
 
     @PostMapping("/validate-user-and-aadhaar")
     public ResponseEntity<ApiResponse<?>> validateUserAndAadhaar(
@@ -126,6 +130,7 @@ public class AuthController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('STAFF', 'CITIZEN')")
     @PostMapping("/forgot-password")
     public ResponseEntity<ApiResponse<String>> forgotPassword(@RequestBody ForgotPasswordRequest request, HttpServletRequest httpRequest) {
         try {
@@ -137,6 +142,7 @@ public class AuthController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('STAFF', 'CITIZEN')")
     @PostMapping("/reset-password")
     public ResponseEntity<ApiResponse<String>> resetPassword(@RequestBody ResetPasswordRequest request, HttpServletRequest httpRequest) {
         try {
@@ -193,6 +199,7 @@ public class AuthController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/add-aadhaar")
     public ResponseEntity<ApiResponse<String>> addAadhaar(@RequestBody AadhaarRequest request, HttpServletRequest httpRequest) {
         String aadhaar = request.getAadhaar();
@@ -219,7 +226,15 @@ public class AuthController {
     @PostMapping("/refresh-token")
     public ResponseEntity<ApiResponse<JwtResponse>> refreshToken(@RequestBody RefreshTokenRequest request, HttpServletRequest httpRequest) {
         try {
-            JwtResponse responseData = authService.refreshToken(request);
+            Optional<RefreshToken> refreshTokenOpt = refreshTokenService.findByToken(request.getRefreshToken());
+            if (refreshTokenOpt.isEmpty() || refreshTokenService.isExpired(refreshTokenOpt.get())) {
+                return ResponseEntity.status(401).body(new ApiResponse<>(401, "Invalid or expired refresh token", null, httpRequest.getRequestURI()));
+            }
+            User user = refreshTokenOpt.get().getUser();
+            refreshTokenService.revokeToken(request.getRefreshToken());
+            RefreshToken newToken = refreshTokenService.createRefreshToken(user);
+
+            JwtResponse responseData = authService.generateNewAccessToken(user, newToken.getToken());
             ApiResponse<JwtResponse> response = new ApiResponse<>(200, "Token refreshed", responseData, httpRequest.getRequestURI());
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -280,12 +295,14 @@ public class AuthController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/staff/reset")
     public ResponseEntity<ApiResponse<?>> resetPassword (@RequestBody ResetStaffPasswordRequest request){
         ApiResponse<?> response = authService.staffPasswordUpdate(request.getEmail(), request.getPassword());
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/delete/{email}")
     public boolean deleteStaff(@PathVariable String email)
     {

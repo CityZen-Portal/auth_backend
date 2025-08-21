@@ -24,4 +24,6 @@ public interface AuthService {
     User getUserById(Long userId);
     ApiResponse staffPasswordUpdate(String email, String password);
     boolean deleteStaff(String email);
+    JwtResponse generateNewAccessToken(User user, String refreshToken);
+
 }

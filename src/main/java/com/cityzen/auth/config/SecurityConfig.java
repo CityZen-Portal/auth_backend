@@ -1,5 +1,6 @@
 package com.cityzen.auth.config;
 
+import com.cityzen.auth.exception.CustomAccessDeniedHandler;
 import com.cityzen.auth.filter.JwtAuthenticationFilter;
 import com.cityzen.auth.util.JwtUtil;
 import org.springframework.context.annotation.Bean;
@@ -34,14 +35,17 @@ public class SecurityConfig {
         http.cors(cors -> {})
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/api/auth/**",
-                                "/api/events/**",
-                                "/admin-profiles/**",
-                                "/citizen-profiles/**"
-
-                        ).permitAll()
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/staff/**").hasRole("STAFF")
+                        .requestMatchers("/citizen/**").hasRole("CITIZEN")
+                        .requestMatchers("/api/events/**").permitAll()
+                        .requestMatchers("/admin-profiles/**").permitAll()
+                        .requestMatchers("/citizen-profiles/**").permitAll()
                         .anyRequest().authenticated()
+                )
+                .exceptionHandling(exception -> exception
+                        .accessDeniedHandler(new CustomAccessDeniedHandler())
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
